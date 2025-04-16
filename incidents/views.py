@@ -7,7 +7,7 @@ from django.db.models import Q
 from .models import Incident, IncidentImage, IncidentComment
 from .serializers import (
     UserSerializer, IncidentSerializer, IncidentCreateSerializer,
-    IncidentCommentSerializer, UserRegistrationSerializer
+    IncidentCommentSerializer
 )
 
 User = get_user_model()
@@ -19,7 +19,7 @@ class UserViewSet(viewsets.ModelViewSet):
     
     @action(detail=False, methods=['post'], permission_classes=[permissions.AllowAny])
     def register(self, request):
-        serializer = UserRegistrationSerializer(data=request.data)
+        serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
             return Response(UserSerializer(user).data, status=status.HTTP_201_CREATED)

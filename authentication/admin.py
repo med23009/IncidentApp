@@ -6,18 +6,19 @@ User = get_user_model()
 
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
-    list_display = ('username', 'email', 'phone_number', 'role', 'is_verified', 'is_active')
+    list_display = ('email', 'role', 'is_verified', 'is_active')
     list_filter = ('role', 'is_verified', 'is_active')
     fieldsets = (
-        (None, {'fields': ('username', 'password')}),
-        ('Personal info', {'fields': ('first_name', 'last_name', 'email', 'phone_number')}),
+        (None, {'fields': ('email', 'password')}),
+        ('Personal info', {'fields': ('first_name', 'last_name')}),
         ('Permissions', {'fields': ('role', 'is_verified', 'is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
         ('Important dates', {'fields': ('last_login', 'date_joined')}),
     )
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('username', 'email', 'phone_number', 'password1', 'password2'),
+            'fields': ('email', 'password1', 'password2'),
         }),
     )
-    search_fields = ('username', 'email', 'phone_number') 
+    search_fields = ('email',)
+    ordering = ('email',) 

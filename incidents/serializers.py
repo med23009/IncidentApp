@@ -7,7 +7,7 @@ User = get_user_model()
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('id', 'username', 'email', 'role', 'phone_number', 'is_verified')
+        fields = ('id', 'email', 'first_name', 'last_name', 'role', 'is_verified')
         read_only_fields = ('id', 'is_verified')
 
 class IncidentImageSerializer(serializers.ModelSerializer):
@@ -75,15 +75,4 @@ class IncidentCreateSerializer(serializers.ModelSerializer):
         for audio_data in audios_data:
             IncidentAudio.objects.create(incident=incident, audio=audio_data)
         
-        return incident
-
-class UserRegistrationSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True)
-    
-    class Meta:
-        model = User
-        fields = ('username', 'email', 'password', 'phone_number')
-    
-    def create(self, validated_data):
-        user = User.objects.create_user(**validated_data)
-        return user 
+        return incident 

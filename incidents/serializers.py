@@ -32,15 +32,15 @@ class IncidentAudioSerializer(serializers.ModelSerializer):
 
 class IncidentSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
-    images = IncidentImageSerializer(many=True, read_only=True)
-    audios = IncidentAudioSerializer(many=True, read_only=True)
-    comments = IncidentCommentSerializer(many=True, read_only=True)
+    images = IncidentImageSerializer(many=True, read_only=True, required=False)
+    audios = IncidentAudioSerializer(many=True, read_only=True, required=False)
+    comments = IncidentCommentSerializer(many=True, read_only=True, required=False)
     
     class Meta:
         model = Incident
         fields = (
             'id', 'user', 'title', 'description', 'category', 'status',
-            'latitude', 'longitude', 'address', 'created_at', 'updated_at',
+            'latitude', 'longitude', 'created_at', 'updated_at',
             'is_offline', 'images', 'audios', 'comments'
         )
         read_only_fields = ('id', 'user', 'created_at', 'updated_at', 'is_offline')
@@ -49,24 +49,30 @@ class IncidentCreateSerializer(serializers.ModelSerializer):
     images = serializers.ListField(
         child=serializers.ImageField(),
         write_only=True,
-        required=False
+        required=False,
+        allow_null=True
     )
     audios = serializers.ListField(
         child=serializers.FileField(),
         write_only=True,
-        required=False
+        required=False,
+        allow_null=True
     )
+    address = serializers.CharField(required=False, allow_null=True)
+    is_offline = serializers.BooleanField(required=False, default=False)
     
     class Meta:
         model = Incident
         fields = (
-            'title', 'description', 'category', 'latitude',
-            'longitude', 'address', 'images', 'audios'
+            'title', 'description', 'category', 'status',
+            'latitude', 'longitude', 'images', 'audios',
+            'address', 'is_offline'
         )
     
     def create(self, validated_data):
-        images_data = validated_data.pop('images', [])
-        audios_data = validated_data.pop('audios', [])
+        images_data = validated_data.pop('images', []) or []
+        audios_data = validated_data.pop('audios', []) or []
+        validated_data.pop('address', None)  # On ignore le champ address car il n'est pas stocké
         incident = Incident.objects.create(**validated_data)
         
         for image_data in images_data:

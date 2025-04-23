@@ -4,11 +4,14 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.contrib.auth import get_user_model
 from django.db.models import Q
+import logging
 from .models import Incident, IncidentImage, IncidentComment
 from .serializers import (
     UserSerializer, IncidentSerializer, IncidentCreateSerializer,
     IncidentCommentSerializer
 )
+
+logger = logging.getLogger('incidents')
 
 User = get_user_model()
 
@@ -43,6 +46,32 @@ class IncidentViewSet(viewsets.ModelViewSet):
     
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+    
+    def create(self, request, *args, **kwargs):
+        logger = logging.getLogger('incidents')
+        logger.debug("=== Début de la création d'un incident ===")
+        logger.debug(f"Données reçues: {request.data}")
+        logger.debug(f"Utilisateur: {request.user}")
+        logger.debug(f"Fichiers reçus: {request.FILES}")
+        
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            logger.debug("Données valides")
+            logger.debug(f"Données validées: {serializer.validated_data}")
+            
+            self.perform_create(serializer)
+            headers = self.get_success_headers(serializer.data)
+            
+            logger.debug("Incident créé avec succès")
+            logger.debug(f"Réponse: {serializer.data}")
+            logger.debug("=== Fin de la création d'un incident ===")
+            
+            return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+        else:
+            logger.error("Erreur de validation")
+            logger.error(f"Erreurs: {serializer.errors}")
+            logger.debug("=== Fin de la création d'un incident (avec erreur) ===")
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     @action(detail=True, methods=['post'])
     def add_comment(self, request, pk=None):

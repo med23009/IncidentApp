@@ -7,7 +7,7 @@ from django.apps import apps
 @receiver(post_save)
 def notify_admin_on_new_incident(sender, instance, created, **kwargs):
     if sender.__name__ == 'Incident' and created and not instance.is_offline:
-        User = apps.get_model('incidents', 'User')
+        User = apps.get_model('authentication', 'User')
         admin_users = User.objects.filter(role='admin', is_active=True)
         admin_emails = [admin.email for admin in admin_users if admin.email]
         
@@ -17,9 +17,10 @@ def notify_admin_on_new_incident(sender, instance, created, **kwargs):
             Un nouvel incident a été signalé:
             
             Titre: {instance.title}
-            Catégorie: {instance.get_category_display()}
             Description: {instance.description}
-            Localisation: {instance.address}
+            Catégorie: {instance.category}
+            Localisation: {instance.latitude}, {instance.longitude}
+            Signalé par: {instance.user.get_full_name()}
             
             Connectez-vous à l'administration pour plus de détails.
             '''
@@ -29,7 +30,7 @@ def notify_admin_on_new_incident(sender, instance, created, **kwargs):
                 message,
                 settings.DEFAULT_FROM_EMAIL,
                 admin_emails,
-                fail_silently=True,
+                fail_silently=False,
             )
 
 @receiver(pre_save)

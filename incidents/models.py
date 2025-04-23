@@ -4,28 +4,13 @@ from .validators import validate_image_extension, validate_audio_extension
 from django.conf import settings
 
 class Incident(models.Model):
-    STATUS_CHOICES = (
-        ('pending', _('En attente')),
-        ('in_progress', _('En cours')),
-        ('resolved', _('Résolu')),
-        ('rejected', _('Rejeté')),
-    )
-    
-    CATEGORY_CHOICES = (
-        ('fire', _('Incendie')),
-        ('accident', _('Accident')),
-        ('flood', _('Inondation')),
-        ('other', _('Autre')),
-    )
-    
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='incidents')
     title = models.CharField(max_length=200)
     description = models.TextField()
-    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    category = models.CharField(max_length=50)
+    status = models.CharField(max_length=50, default='pending')
     latitude = models.FloatField()
     longitude = models.FloatField()
-    address = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     is_offline = models.BooleanField(default=False)
